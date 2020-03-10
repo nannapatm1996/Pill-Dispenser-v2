@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginBottom="@dimen/list_padding_vertical_small"
+        android:text="Medicine Name"
+        tools:text="Medicine Name"/>
+
+    <EditText
+        android:id="@+id/edit_medicine_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textCapWords"
+        android:maxLength="15"
+        android:textColor="@color/grey_500"
+        android:textStyle="italic"
+        android:hint="add a medicine name"
+        android:layout_marginBottom="@dimen/activity_vertical_margin" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginBottom="@dimen/list_padding_vertical_small"
+        android:text="Description"
+        tools:text="Description"/>
+
+    <EditText
+        android:id="@+id/edit_medicine_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textCapWords"
+        android:maxLength="15"
+        android:textColor="@color/grey_500"
+        android:textStyle="italic"
+        android:hint="add a Description"
+        android:layout_marginBottom="@dimen/activity_vertical_margin" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginBottom="@dimen/list_padding_vertical_small"
+        android:text="Recommendation"
+        tools:text="Recommendation"/>
+
+    <EditText
+        android:id="@+id/edit_medicine_recommendation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textCapWords"
+        android:maxLength="15"
+        android:textColor="@color/grey_500"
+        android:textStyle="italic"
+        android:hint="add a Recommendation"
+        android:layout_marginBottom="@dimen/activity_vertical_margin" />
+
+    <Button
+        android:id="@+id/btn_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit" />
+
+
+</LinearLayout>

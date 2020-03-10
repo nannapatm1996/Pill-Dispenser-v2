@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "451853587496",
+    "firebase_url": "https://pilldispenser-37afa.firebaseio.com",
+    "project_id": "pilldispenser-37afa",
+    "storage_bucket": "pilldispenser-37afa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451853587496:android:be7ea685ee9b99c69f111d",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "451853587496-3pkb17telft8k5bidcmk2f77fj64sc02.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapplication",
+            "certificate_hash": "2a049af7f37432fbf0112c6e652e45199327f253"
+          }
+        },
+        {
+          "client_id": "451853587496-25ruqev393kvlcmal95om11r1bfuoqiq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMVqbgJOpwyitfoQWJC7YxICPQraFgTBY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "451853587496-25ruqev393kvlcmal95om11r1bfuoqiq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
