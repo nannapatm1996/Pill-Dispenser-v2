@@ -46,6 +46,7 @@ public class RingingDoneActivity extends RobotActivity {
     public String globalname;
     public String globalMed;
     public String globalRecom;
+    public String globalReminder;
     public String globalDay;
    // public String userid;
    // private DatabaseReference myRef;
@@ -85,11 +86,13 @@ public class RingingDoneActivity extends RobotActivity {
                     String Format = ds.child("format").getValue().toString();
                     String Medicine = ds.child("med").getValue().toString();
                     String Recom = ds.child("recom").getValue().toString();
+                    String addRemind = ds.child("addReminder").getValue().toString();
 
                     globalname = Name;
                     globalformat = Format;
                     globalMed = Medicine;
                     globalRecom = Recom;
+                    globalReminder = addRemind;
                     //etc
                 }
 
@@ -189,7 +192,9 @@ public class RingingDoneActivity extends RobotActivity {
                 //robotAPI.motion.moveBody(0,0,30);
                 robotAPI.motion.moveHead(0,10,L2);
                 //robotAPI.motion.moveHead(0,0,L2);
-                robotAPI.robot.speak("Please take the " + "Wednesday, " + globalformat + "," + globalMed + " " + "," +"and " + globalRecom);
+                robotAPI.robot.speak("Please take the " + "Wednesday, " + globalformat + "," + globalMed +
+                        " " + "," +"and " + globalRecom + "and don't forget to " + globalReminder +
+                        " before taking the pill from the pill dispenser box");
             }
         }.start();
 
@@ -369,12 +374,14 @@ public class RingingDoneActivity extends RobotActivity {
             //User user = new User();
             alarm.setName(ds.child(userID).getValue(Alarm.class).getName()); //set the name
             alarm.setFormat(ds.child(userID).getValue(Alarm.class).getFormat());
+            alarm.setAddReminder(ds.child(userID).getValue(Alarm.class).getAddReminder());
 //            uInfo.setEmail(ds.child(userID).getValue(UserInformation.class).getEmail()); //set the email
 //            uInfo.setPhone_num(ds.child(userID).getValue(UserInformation.class).getPhone_num()); //set the phone_num
 
             //display all the information
             Log.d(TAG, "showData: name: " + alarm.getName());
             Log.d(TAG, "showData: format: " + alarm.getFormat());
+            Log.d(TAG, "showData: Reminder "+ alarm.getAddReminder());
 //            Log.d(TAG, "showData: phone_num: " + uInfo.getPhone_num());
 
         }

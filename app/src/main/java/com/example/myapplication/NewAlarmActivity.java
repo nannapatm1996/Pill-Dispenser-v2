@@ -3,9 +3,12 @@ package com.example.myapplication;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -23,7 +26,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NewAlarmActivity extends BaseActivity {
+public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "NewAlarmActivity";
     private static final String REQUIRED = "Required";
@@ -36,6 +39,12 @@ public class NewAlarmActivity extends BaseActivity {
     private EditText mAlarmMedRecom;
     private CheckBox mMon, mTues, mWed, mThurs, mFri, mSat, mSun;
     private Button mSubmit, mCancel;
+    private Spinner mReminderSpinner;
+
+
+    String[] reminderOptions = {"Wash Hand","Wear Mask", "Wash hands and wear masks"};
+
+    String reminder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +61,8 @@ public class NewAlarmActivity extends BaseActivity {
         mAlarmMedRecom = findViewById(R.id.edit_alarm_recom);
         mAlarmName = findViewById(R.id.edit_alarm_name);
 
+        mReminderSpinner = findViewById(R.id.spinner_reminder);
+
         mSubmit = findViewById(R.id.btn_alarm_submit);
         mCancel = findViewById(R.id.btn_alarm_cancel);
 
@@ -62,6 +73,15 @@ public class NewAlarmActivity extends BaseActivity {
         mFri = findViewById(R.id.edit_alarm_fri);
         mSat = findViewById(R.id.edit_alarm_sat);
         mSun = findViewById(R.id.edit_alarm_sun);
+
+        mReminderSpinner = findViewById(R.id.spinner_reminder);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, reminderOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mReminderSpinner.setAdapter(adapter);
+        mReminderSpinner.setOnItemSelectedListener(this);
+
+
 
         mSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,9 +107,9 @@ public class NewAlarmActivity extends BaseActivity {
         final String alarmName = mAlarmName.getText().toString();
         final String alarmMedName = mAlarmMedName.getText().toString();
         final String alarmMedRecom = mAlarmMedRecom.getText().toString();
-        Log.d("alarmMed", alarmMedName);
-        Log.d("alarmRecom", alarmMedRecom);
-        Log.d("alarmName",alarmName);
+        final String addReminder = reminder;
+
+
         int chosenHour, chosenMinute;
 
         final Calendar time = Calendar.getInstance();
@@ -161,7 +181,7 @@ public class NewAlarmActivity extends BaseActivity {
                             Toast.LENGTH_SHORT).show();
                 } else {
                     // Write new post + timepicker, date check etc.
-                    writeNewPost(userId, user.username, alarmName, alarmMedRecom, alarmMedName, hour, minute,ampm,timeDisplay);
+                    writeNewPost(userId, user.username, alarmName, alarmMedRecom, alarmMedName, hour, minute,ampm,timeDisplay,addReminder);
                 }
 
                 // Finish this Activity, back to the stream
@@ -201,11 +221,29 @@ public class NewAlarmActivity extends BaseActivity {
 
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        final String addReminder = parent.getItemAtPosition(position).toString();
+        Toast.makeText(this, "Select Item: "+ addReminder, Toast.LENGTH_SHORT).show();
+        //final String addReminder = mAlarmMedRecom.getText().toString();
 
-    private void writeNewPost(String userId, String username, String name, String recom, String MedName, int hour, int minute, String ampm, String timeDisplay) {
+        // final String addReminder = mReminderSpinner
+
+        reminder = addReminder;
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        Toast.makeText(this, "wash hand and wear mask", Toast.LENGTH_SHORT).show();
+
+    }
+
+
+
+    private void writeNewPost(String userId, String username, String name, String recom, String MedName, int hour, int minute, String ampm, String timeDisplay, String addReminder) {
 
         String key = mDatabase.child("alarms").push().getKey();
-        Alarm alarm = new Alarm(userId,hour,minute,ampm,name,MedName,recom,timeDisplay);
+        Alarm alarm = new Alarm(userId,hour,minute,ampm,name,MedName,recom,timeDisplay,addReminder);
         Map<String, Object> alarmValues = alarm.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();
@@ -215,6 +253,7 @@ public class NewAlarmActivity extends BaseActivity {
         mDatabase.updateChildren(childUpdates);
 
     }
+
 
 
 }

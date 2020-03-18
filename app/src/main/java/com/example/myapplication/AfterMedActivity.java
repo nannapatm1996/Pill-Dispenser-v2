@@ -87,7 +87,7 @@ public class AfterMedActivity extends RobotActivity {
                 int bright = 50;
 
                 robotAPI.motion.moveBody(0,0,180);
-                robotAPI.motion.moveBody(1,0,0);
+                robotAPI.motion.moveBody(2,0,0);
                 robotAPI.motion.moveBody(0,0,180);
                 robotAPI.wheelLights.setColor(WheelLights.Lights.SYNC_BOTH, 0xff, 0x00ff0000);
                 robotAPI.wheelLights.setBrightness(WheelLights.Lights.SYNC_BOTH,0xff, bright);

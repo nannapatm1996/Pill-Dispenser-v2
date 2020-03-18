@@ -24,7 +24,7 @@ public class Alarm {
     public static final int SUN = 7;
 
     private int alarmNumber, hour, minute;
-    private String format, name, uid, alarmMed,alarmRecom,time;
+    private String format, name, uid, alarmMed,alarmRecom,time, addReminder;
     private SparseBooleanArray allDays;
  //   private boolean mon, tues, wed, thurs, fri, sat, sun;
     //private long time;
@@ -34,7 +34,7 @@ public class Alarm {
 
 
    // public Alarm(String uid, int hour, int minute, String format,String name,String alarmMed, String alarmRecom,String time,@Days int... days){
-    public Alarm(String uid, int hour, int minute, String format,String name,String alarmMed, String alarmRecom, String time){
+    public Alarm(String uid, int hour, int minute, String format,String name,String alarmMed, String alarmRecom, String time, String addReminder){
         //this.alarmNumber = alarmNumber;
         this.uid = uid;
         this.hour = hour;
@@ -45,6 +45,7 @@ public class Alarm {
         this.alarmMed = alarmMed;
         this.alarmRecom = alarmRecom;
         this.time = time;
+        this.addReminder = addReminder;
        /* this.mon = mon;
         this.tues = tues;
         this.wed = wed;
@@ -102,6 +103,14 @@ public class Alarm {
     public void setTime(String time) { this.time = time; }
 
     public String getTime() { return time; }
+
+    public String getAddReminder(){return addReminder; }
+
+    public void setAddReminder(String addReminder){this.addReminder = addReminder; }
+
+
+
+
 
 
     //public void setIsEnabled(){this.isEnabled = isEnabled;}
@@ -190,6 +199,7 @@ public class Alarm {
         result.put("med",alarmMed);
         result.put("recom",alarmRecom);
         result.put("time",time);
+        result.put("addReminder", addReminder);
       /*  result.put("mon", mon);
         result.put("tues", tues);
         result.put("wed", wed);
