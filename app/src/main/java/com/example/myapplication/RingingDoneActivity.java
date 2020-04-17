@@ -208,7 +208,10 @@ public class RingingDoneActivity extends RobotActivity {
             @Override
             public void onFinish() {
                 robotAPI.cancelCommandBySerial(SerialFollow);
-                Intent intent = new Intent(RingingDoneActivity.this, AfterMedActivity.class);
+                Intent intent = new Intent(RingingDoneActivity.this, CameraActivity.class);
+                intent.putExtra("format", globalformat);
+                intent.putExtra("med", globalMed);
+                intent.putExtra("name",globalname);
                 startActivity(intent);
             }
         }.start();
