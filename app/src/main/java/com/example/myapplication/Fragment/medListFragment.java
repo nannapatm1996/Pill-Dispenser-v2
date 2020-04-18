@@ -114,49 +114,5 @@ public abstract class medListFragment extends Fragment {
 
     public abstract Query getQuery(DatabaseReference databaseReference);
 
-  /*  private void fetch() {
-        Query query = FirebaseDatabase.getInstance()
-                .getReference()
-                .child("posts");
-
-        FirebaseRecyclerOptions<Medicine> options =
-                new FirebaseRecyclerOptions.Builder<Medicine>()
-                        .setQuery(query, new SnapshotParser<Medicine>() {
-                            @NonNull
-                            @Override
-                            public Medicine parseSnapshot(@NonNull DataSnapshot snapshot) {
-                                return new Medicine(snapshot.child("uid").getValue().toString(),
-                                        snapshot.child("title").getValue().toString(),
-                                        snapshot.child("desc").getValue().toString());
-                            }
-                        })
-                        .build();
-
-        adapter = new FirebaseRecyclerAdapter<Medicine, MedViewHolder_delete>(options) {
-            @Override
-            public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item, parent, false);
-
-                return new ViewHolder(view);
-            }
-
-
-            @Override
-            protected void onBindViewHolder(RecyclerView.ViewHolder holder, final int position, Medicine model) {
-                holder.setTxtTitle(model.getmTitle());
-                holder.setTxtDesc(model.getmDesc());
-
-                holder.root.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Toast.makeText(MainActivity.this, String.valueOf(position), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-        };
-        recyclerView.setAdapter(adapter);
-    }*/
 
 }

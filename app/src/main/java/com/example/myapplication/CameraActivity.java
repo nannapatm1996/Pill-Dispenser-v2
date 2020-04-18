@@ -214,13 +214,13 @@ public class CameraActivity extends RobotActivity {
             captureBuilder.addTarget(reader.getSurface());
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
             // Orientation
-            int rotation = getWindowManager().getDefaultDisplay().getRotation();
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
+            //int rotation = getWindowManager().getDefaultDisplay().getRotation();
+            //captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
 
             //make file using dateformat
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmddhhmmss");
             String date = dateFormat.format(new Date());
-            String photoFile = "Picture_"+date+".jpg";
+            String photoFile = "Praying.jpg";
             final File file = new File(Environment.getExternalStorageDirectory()+ photoFile);
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
@@ -378,6 +378,9 @@ public class CameraActivity extends RobotActivity {
         stopBackgroundThread();
         super.onPause();
     }
+
+    //TODO: OKHTTP
+
 
 
     public static RobotCallback robotCallback = new RobotCallback() {
