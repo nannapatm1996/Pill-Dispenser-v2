@@ -45,6 +45,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.asus.robotframework.API.MotionControl;
+import com.asus.robotframework.API.RobotAPI;
 import com.asus.robotframework.API.RobotCallback;
 import com.asus.robotframework.API.RobotCmdState;
 import com.asus.robotframework.API.RobotCommand;
@@ -107,7 +109,8 @@ public class CameraActivity extends RobotActivity{
     private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
-    public String name, medicine, format;
+    public String name, medicine, format, responseResult;
+
 
     public CameraActivity(RobotCallback robotCallback, RobotCallback.Listen robotListenCallback) {
         super(robotCallback, robotListenCallback);
@@ -119,43 +122,27 @@ public class CameraActivity extends RobotActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
+        robotAPI.robot.setExpression(RobotFace.HIDEFACE);
+
         name = getIntent().getStringExtra("name");
         medicine = getIntent().getStringExtra("med");
         format = getIntent().getStringExtra("format");
-
-        Connect = findViewById(R.id.connect);
-        //take_picture = findViewById(R.id.btn_takepicture);
-        Connect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        selectimg = findViewById(R.id.select_img);
-        selectimg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectImage();
-            }
-        });
 
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         takePictureButton = (Button) findViewById(R.id.btn_takepicture);
         assert takePictureButton != null;
+
+        robotAPI.motion.moveBody(-2,0,0, MotionControl.SpeedLevel.Body.L2);
+
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //set delay
                 takePicture();
                 selectImage();
                 connectServer();
-                Intent intent = new Intent(CameraActivity.this, AfterMedActivity.class);
-                intent.putExtra("name", name);
-                intent.putExtra("med", medicine);
-                intent.putExtra("format", format);
-                //intent.putExtra("imagePath",selectedImagePath);
-                startActivity(intent);
             }
         });
 
@@ -229,6 +216,26 @@ public class CameraActivity extends RobotActivity{
                         TextView responseText = findViewById(R.id.responseText);
                         try {
                             responseText.setText(response.body().string());
+                            responseResult = response.body().toString();
+                            if (responseResult == "Sitting"){
+                                Intent intent = new Intent(CameraActivity.this, AfterMedActivity.class);
+                                Log.d("Result",responseResult);
+                                intent.putExtra("name", name);
+                                intent.putExtra("med", medicine);
+                                intent.putExtra("format", format);
+                                //intent.putExtra("imagePath",selectedImagePath);
+                                startActivity(intent);
+                            }else{
+                                Intent intent = new Intent(CameraActivity.this, PrayingWaitActivity.class);
+                                Log.d("Result",responseResult);
+                                intent.putExtra("name", name);
+                                intent.putExtra("med", medicine);
+                                intent.putExtra("format", format);
+                                //intent.putExtra("imagePath",selectedImagePath);
+                                startActivity(intent);
+                            }
+
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -241,9 +248,9 @@ public class CameraActivity extends RobotActivity{
 
     public void selectImage() {
 
-        EditText imgPath = findViewById(R.id.imgPath);
+        //EditText imgPath = findViewById(R.id.imgPath);
         String img_path = globalFile;
-        imgPath.setText(img_path);
+        //imgPath.setText(img_path);
         Toast.makeText(getApplicationContext(), img_path, Toast.LENGTH_LONG).show();
         selectedImagePath = img_path;
         //ORIGINAL CODE
@@ -261,10 +268,10 @@ public class CameraActivity extends RobotActivity{
 
             //selectedImagePath = getPath(getApplicationContext(), uri);
             //edit here to put in save path from take picture
-            EditText imgPath = findViewById(R.id.imgPath);
+           // EditText imgPath = findViewById(R.id.imgPath);
             //imgPath.setText(selectedImagePath);
             String img_path = file.toString();
-            imgPath.setText(img_path);
+            //imgPath.setText(img_path);
             //Toast.makeText(getApplicationContext(), selectedImagePath, Toast.LENGTH_LONG).show();
             Toast.makeText(getApplicationContext(), img_path, Toast.LENGTH_LONG).show();
         }

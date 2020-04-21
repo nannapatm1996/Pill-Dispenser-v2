@@ -7,7 +7,7 @@
     <TextureView
         android:id="@+id/texture"
         android:layout_width="match_parent"
-        android:layout_height="359dp"
+        android:layout_height="536dp"
         android:layout_above="@+id/btn_takepicture"
         android:layout_alignParentTop="true" />
 
@@ -20,26 +20,6 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:text="take_picture" />
-
-    <EditText
-        android:id="@+id/imgPath"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:hint="Image Path Appears Here" />
-
-    <Button
-        android:id="@+id/select_img"
-        android:layout_width="match_parent"
-        android:layout_height="26dp"
-        android:onClick="selectImage"
-        android:text="Select Image" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Connect to Server"
-        android:onClick="connectServer"
-        android:id="@+id/connect"/>
 
     <TextView
         android:layout_width="match_parent"
