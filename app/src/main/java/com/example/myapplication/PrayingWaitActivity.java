@@ -10,7 +10,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 public class PrayingWaitActivity extends BaseActivity {
-    String name,medicine,format;
+    String name,medicine,format,recom,remind;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +22,9 @@ public class PrayingWaitActivity extends BaseActivity {
         name = getIntent().getStringExtra("name");
         medicine = getIntent().getStringExtra("med");
         format = getIntent().getStringExtra("format");
+        recom = getIntent().getStringExtra("recom");
+        remind = getIntent().getStringExtra("remind");
+
 
         Button FinishBtn;
 
@@ -35,6 +38,8 @@ public class PrayingWaitActivity extends BaseActivity {
                 intent.putExtra("name", name);
                 intent.putExtra("med", medicine);
                 intent.putExtra("format", format);
+                intent.putExtra("recom", recom);
+                intent.putExtra("remind", remind);
                 //intent.putExtra("imagePath",selectedImagePath);
                 startActivity(intent);
             }

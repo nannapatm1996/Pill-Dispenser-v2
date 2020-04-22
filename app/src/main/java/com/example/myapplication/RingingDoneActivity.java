@@ -213,6 +213,8 @@ public class RingingDoneActivity extends RobotActivity {
                 intent.putExtra("format", globalformat);
                 intent.putExtra("med", globalMed);
                 intent.putExtra("name",globalname);
+                intent.putExtra("recom", globalRecom);
+                intent.putExtra("remind",globalReminder);
                 startActivity(intent);
             }
         }.start();

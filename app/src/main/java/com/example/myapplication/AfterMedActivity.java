@@ -25,7 +25,12 @@ import com.robot.asus.robotactivity.RobotActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class AfterMedActivity extends RobotActivity {
@@ -46,6 +51,7 @@ public class AfterMedActivity extends RobotActivity {
     String TOPIC;
 
     MediaPlayer mMediaPlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +63,11 @@ public class AfterMedActivity extends RobotActivity {
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
         String Blink;
 
+        Calendar c = Calendar.getInstance();
+        Date date = c.getTime();
+        String dayofWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date.getTime());
+        Log.d("dayofWeek",dayofWeek);
+
 
         Button btnTook = findViewById(R.id.btnTook);
         Button btnSkip = findViewById(R.id.btnSkip);
@@ -66,6 +77,12 @@ public class AfterMedActivity extends RobotActivity {
         String name = getIntent().getStringExtra("name");
         String med = getIntent().getStringExtra("med");
         String format = getIntent().getStringExtra("format");
+        String recom = getIntent().getStringExtra("recom");
+        String remind = getIntent().getStringExtra("remind");
+
+                robotAPI.robot.speak("Please take the " + dayofWeek + " ," + format + "," + med +
+                " " + "," +"and " + recom + "and don't forget to " + remind +
+                " before taking the pill from the pill dispenser box");
 
         robotAPI.robot.speak("Did you take the medicine?");
 

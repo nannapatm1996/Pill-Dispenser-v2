@@ -25,6 +25,7 @@ import android.media.ImageReader;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -36,6 +37,7 @@ import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -109,7 +111,7 @@ public class CameraActivity extends RobotActivity{
     private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
-    public String name, medicine, format, responseResult;
+    public String name, medicine, format, responseResult, recom, remind,Sitting,Prostrating;
 
 
     public CameraActivity(RobotCallback robotCallback, RobotCallback.Listen robotListenCallback) {
@@ -122,11 +124,18 @@ public class CameraActivity extends RobotActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         robotAPI.robot.setExpression(RobotFace.HIDEFACE);
 
         name = getIntent().getStringExtra("name");
         medicine = getIntent().getStringExtra("med");
         format = getIntent().getStringExtra("format");
+        recom = getIntent().getStringExtra("recom");
+        remind = getIntent().getStringExtra("remind");
+
+        Sitting = "Sitting";
+
 
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
@@ -134,7 +143,23 @@ public class CameraActivity extends RobotActivity{
         takePictureButton = (Button) findViewById(R.id.btn_takepicture);
         assert takePictureButton != null;
 
-        robotAPI.motion.moveBody(-2,0,0, MotionControl.SpeedLevel.Body.L2);
+        robotAPI.motion.moveBody(0,0, 180, MotionControl.SpeedLevel.Body.L2);
+        robotAPI.motion.moveBody(2,0,0, MotionControl.SpeedLevel.Body.L3);
+        robotAPI.motion.moveBody(0,0,180, MotionControl.SpeedLevel.Body.L2);
+        robotAPI.motion.moveHead(0,-10, MotionControl.SpeedLevel.Head.L2);
+
+        new CountDownTimer(23000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+            }
+
+            public void onFinish() {
+                takePicture();
+                selectImage();
+                connectServer();
+                robotAPI.motion.moveHead(0,0, MotionControl.SpeedLevel.Head.L2);
+            }
+        }.start();
 
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,13 +241,17 @@ public class CameraActivity extends RobotActivity{
                         TextView responseText = findViewById(R.id.responseText);
                         try {
                             responseText.setText(response.body().string());
-                            responseResult = response.body().toString();
-                            if (responseResult == "Sitting"){
+                            responseResult = responseText.getText().toString();
+                            //responseResult = response.body().string();
+                            Log.d("response",responseResult);
+                            if (responseResult == Sitting){
                                 Intent intent = new Intent(CameraActivity.this, AfterMedActivity.class);
                                 Log.d("Result",responseResult);
                                 intent.putExtra("name", name);
                                 intent.putExtra("med", medicine);
                                 intent.putExtra("format", format);
+                                intent.putExtra("recom", recom);
+                                intent.putExtra("remind",remind);
                                 //intent.putExtra("imagePath",selectedImagePath);
                                 startActivity(intent);
                             }else{
@@ -231,6 +260,8 @@ public class CameraActivity extends RobotActivity{
                                 intent.putExtra("name", name);
                                 intent.putExtra("med", medicine);
                                 intent.putExtra("format", format);
+                                intent.putExtra("recom", recom);
+                                intent.putExtra("remind", remind);
                                 //intent.putExtra("imagePath",selectedImagePath);
                                 startActivity(intent);
                             }
