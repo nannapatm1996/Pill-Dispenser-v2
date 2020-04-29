@@ -192,9 +192,9 @@ public class RingingDoneActivity extends RobotActivity {
                 //robotAPI.motion.moveBody(0,0,30);
                 robotAPI.motion.moveHead(0,10,L2);
                 //robotAPI.motion.moveHead(0,0,L2);
-                robotAPI.robot.speak("Please take the " + "Wednesday, " + globalformat + "," + globalMed +
+              /*  robotAPI.robot.speak("Please take the " + "Wednesday, " + globalformat + "," + globalMed +
                         " " + "," +"and " + globalRecom + "and don't forget to " + globalReminder +
-                        " before taking the pill from the pill dispenser box");
+                        " before taking the pill from the pill dispenser box");*/
             }
         }.start();
 

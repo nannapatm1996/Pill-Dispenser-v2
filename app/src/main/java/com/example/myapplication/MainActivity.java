@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.myapplication.Fragment.myAlarmFragment;
+import com.example.myapplication.Fragment.myBluetoothFragment;
 import com.example.myapplication.Fragment.myMedFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,12 +46,12 @@ public class MainActivity extends BaseActivity {
             private final Fragment[] mFragments = new Fragment[] {
                     new myAlarmFragment(),
                     new myMedFragment(),
-                   // new MyTopPostsFragment(),
+                    new myBluetoothFragment(),
             };
             private final String[] mFragmentNames = new String[] {
                     getString(R.string.heading_my_alarm),
                     getString(R.string.heading_my_med),
-                   // getString(R.string.heading_my_top_posts)
+                    getString(R.string.heading_bluetooth)
             };
            @Override
             public Fragment getItem(int position) {
