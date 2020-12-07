@@ -36,9 +36,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
 import com.example.myapplication.service.BluetoothConnectionService;
-import com.example.myapplication.service.SerialListener;
-import com.example.myapplication.service.SerialService;
-import com.example.myapplication.service.SerialSocket;
+//import com.example.myapplication.service.SerialListener;
+//import com.example.myapplication.service.SerialService;
+//import com.example.myapplication.service.SerialSocket;
 
 import org.w3c.dom.Text;
 

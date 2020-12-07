@@ -79,6 +79,7 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
     public DeviceListAdapter mDeviceListAdapter;
     ListView lvNewDevices;
 
+
     // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
