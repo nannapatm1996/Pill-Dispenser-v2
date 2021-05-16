@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,11 +19,13 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.myapplication.Adapter.DeviceListAdapter;
 import com.example.myapplication.Model.Alarm;
@@ -54,8 +57,10 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
     private EditText mAlarmName;
     private EditText mAlarmMedName;
     private EditText mAlarmMedRecom;
-    private Button mSubmit, mCancel;
+    private Button mSubmit, mCancel,mBtnRoomPermission;
     private Spinner mReminderSpinner;
+    private TextView mRoomPermission;
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
     String[] reminderOptions = {"Wash Hand","Wear Mask", "Wash hands and wear masks"};
     String reminder;
@@ -198,11 +203,32 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
         mSubmit = findViewById(R.id.btn_alarm_submit);
         mCancel = findViewById(R.id.btn_alarm_cancel);
         mReminderSpinner = findViewById(R.id.spinner_reminder);
+        mRoomPermission = findViewById(R.id.TvPermission);
+        mBtnRoomPermission = findViewById(R.id.btnPermissionRoom);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, reminderOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mReminderSpinner.setAdapter(adapter);
         mReminderSpinner.setOnItemSelectedListener(this);
+        // check permission READ_CONTACTS is granted or not
+        if (ContextCompat.checkSelfPermission(NewAlarmActivity.this, Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted by user yet
+            Log.d("ZenboGoToLocation", "READ_CONTACTS permission is not granted by user yet");
+            mRoomPermission.setText(getString(R.string.permission_not_granted));
+            mBtnRoomPermission.setEnabled(true);
+
+        }
+        else{
+            // permission is granted by user
+            Log.d("ZenboGoToLocation", "READ_CONTACTS permission is granted");
+            mRoomPermission.setText(getString(R.string.permission_granted));
+            mBtnRoomPermission.setEnabled(false);
+
+        }
+
+        // initial params
+       // mTvRoom1.setText(getString(R.string.first_room_info));
 
         //------------- Declare for BT ------------------
         Button btnONOFF = (Button) findViewById(R.id.btnONOFF);
@@ -214,26 +240,26 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
         //btnSend = (Button) findViewById(R.id.btnSend);
         //etSend = (EditText) findViewById(R.id.editText);
 
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver4,filter);
+        //IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        //registerReceiver(mBroadcastReceiver4,filter);
 
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        //mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         lvNewDevices.setOnItemClickListener(NewAlarmActivity.this);
 
-        btnONOFF.setOnClickListener(new View.OnClickListener() {
+        /*btnONOFF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG,"onClick: Enabling/Disabling bluetooth");
                 enableDisableBT();
             }
-        });
+        });*/
 
-        btnStartConnection.setOnClickListener(new View.OnClickListener() {
+        /*btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startConnection();
             }
-        });
+        });*/
 
 
         mSubmit.setOnClickListener(new View.OnClickListener() {
@@ -242,7 +268,17 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
                 submitAlarm();
             }
         });
+
+        mBtnRoomPermission.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestPermission();
+            }
+        });
     }
+
+
+
 
     public void startConnection(){
         startBtConnection(mBTDevice,MY_UUID_INSECURE);
@@ -257,6 +293,7 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
         if(mBluetoothAdapter == null){
             Log.d(TAG,"enabledDisabledBT: Does not have BT capabilities");
         }
+
         if(!mBluetoothAdapter.isEnabled()){
             Log.d(TAG,"enabledDisableBT: enabling BT");
             Intent enabledBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -339,6 +376,33 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
         }
     }
 
+    private void requestPermission() {
+        // Check the SDK version and whether the permission is already granted or not.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                this.checkSelfPermission(Manifest.permission.READ_CONTACTS) ==
+                        PackageManager.PERMISSION_GRANTED) {
+            // Android version is lesser than 6.0 or the permission is already granted.
+            Log.d("ZenboGoToLocation", "permission is already granted");
+            return;
+        }
+
+        if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+                    PERMISSIONS_REQUEST_READ_CONTACTS);
+        } else {
+            //showMessageOKCancel("You need to allow access to Contacts",
+            //        new DialogInterface.OnClickListener() {
+            //            @Override
+            //            public void onClick(DialogInterface dialog, int which) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+                    PERMISSIONS_REQUEST_READ_CONTACTS);
+            //            }
+            //        });
+        }
+    }
+
+
+
     private void submitAlarm() {
         //Get Input EditText, Timepicker, CheckBox
 
@@ -393,7 +457,7 @@ public class NewAlarmActivity extends BaseActivity implements AdapterView.OnItem
         String formated = newline + fromEtSend;
         byte[] bytes = formated.getBytes(Charset.defaultCharset());
         //byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
-        mBluetoothConnection.write(bytes);
+       // mBluetoothConnection.write(bytes);
 
         //TODO: put ^ this into writeToPost
 

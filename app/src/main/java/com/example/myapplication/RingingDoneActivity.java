@@ -18,6 +18,8 @@ import com.asus.robotframework.API.RobotCommand;
 import com.asus.robotframework.API.RobotErrorCode;
 import com.asus.robotframework.API.RobotFace;
 import com.asus.robotframework.API.VisionConfig;
+import com.asus.robotframework.API.results.DetectPersonResult;
+import com.asus.robotframework.API.results.RoomInfo;
 import com.example.myapplication.Model.Alarm;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -30,6 +32,11 @@ import com.robot.asus.robotactivity.RobotActivity;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import static com.asus.robotframework.API.MotionControl.SpeedLevel.Head.L2;
 
@@ -48,8 +55,9 @@ public class RingingDoneActivity extends RobotActivity {
     public String globalRecom;
     public String globalReminder;
     public String globalDay;
-   // public String userid;
-   // private DatabaseReference myRef;
+    public static boolean personDetect = false;
+     public String userid;
+    // private DatabaseReference myRef;
     //public Intent i;
 
     //For snapshot
@@ -57,8 +65,18 @@ public class RingingDoneActivity extends RobotActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference myRef;
-    private  String userID;
+    private String userID;
 
+    //Robot Locomotion
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    private static boolean isRobotApiInitialed = false;
+    private static String sRoom1;
+    private static String sRoom2;
+    private int day, month, hr, min;
+    private String IslamicUrl;
+    private static String facedetect_result = "no face detect";
+    private static String thismap = "map1";
+    CountDownTimer TimerDetect;
 
 
     public RingingDoneActivity(RobotCallback robotCallback, RobotCallback.Listen robotListenCallback) {
@@ -76,8 +94,8 @@ public class RingingDoneActivity extends RobotActivity {
         //TODO: Query Data
 
 
-       // FirebaseUser user = mAuth.getCurrentUser();
-       // userID = user.getUid();
+        // FirebaseUser user = mAuth.getCurrentUser();
+        // userID = user.getUid();
         table_user.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -96,10 +114,10 @@ public class RingingDoneActivity extends RobotActivity {
                     //etc
                 }
 
-                Log.d("GlobalVar",globalname);
-                Log.d("GlobalVar",globalformat);
-                Log.d("GlobalVar",globalMed);
-                Log.d("GlobalVar",globalRecom);
+                Log.d("GlobalVar", globalname);
+                Log.d("GlobalVar", globalformat);
+                Log.d("GlobalVar", globalMed);
+                Log.d("GlobalVar", globalRecom);
             }
 
             @Override
@@ -123,18 +141,41 @@ public class RingingDoneActivity extends RobotActivity {
             }
 
             public void onFinish() {
-                robotAPI.robot.setExpression(RobotFace.SHOCKED);
+                //robotAPI.robot.setExpression(RobotFace.SHOCKED);
                 mMediaPlayer.stop();
-                robotAPI.motion.moveBody(0,0,30);
+                robotAPI.robot.setExpression(RobotFace.SHOCKED);
+                robotAPI.robot.setExpression(RobotFace.DEFAULT);
+                //robotAPI.motion.moveBody(0,0,30);
                 //robotAPI.robot.speak("Patrick, where are you");
-                robotAPI.motion.moveBody(0,0,-60);
-                robotAPI.motion.moveBody(0,0,30);
+                //robotAPI.motion.moveBody(0,0,-60);
+                //robotAPI.motion.moveBody(0,0,30);
+
+                //robot Locomotion
+                ArrayList<RoomInfo> arrayListRooms = robotAPI.contacts.room.getAllRoomInfo();
+                sRoom1 = arrayListRooms.get(0).keyword;
+                sRoom2 = arrayListRooms.get(1).keyword;
+                // sRoom3 = arrayListRooms.get(2).keyword;
+                //mTvRoom1.setText(sRoom1+" ; "+sRoom2); set room at Text
+
+                //TODO: add fetch time and country
+                Calendar c = Calendar.getInstance();
+                SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date dt = new Date();
+                day = dt.getDate();
+                month = dt.getMonth() + 1;
+                hr = dt.getHours();
+                min = dt.getMinutes();
+
+                IslamicUrl = "https://zenbo.pythonanywhere.com/api/v1/resources/prayertime?day=" + day + "&month=" +
+                        month + "&hour=" + hr + "&minute=" + min + "&country=QA";
+
+                newLoco();
 
             }
         }.start();
 
 
-        new CountDownTimer(5000,1000){
+        /*new CountDownTimer(5000,1000){
             public void onTick(long millisUntilFinished){
 
             }
@@ -172,11 +213,11 @@ public class RingingDoneActivity extends RobotActivity {
                 StartFollowMe();
 
             }
-        }.start();
+        }.start();*/
 
     }
 
-    private void StartFollowMe(){
+    private void StartFollowMe() {
         int SerialFollow = robotAPI.utility.followUser();
 
         new CountDownTimer(18000, 1000) {
@@ -190,7 +231,7 @@ public class RingingDoneActivity extends RobotActivity {
                 //robotAPI.motion.moveBody(0,0,30);
                 //robotAPI.motion.moveBody(0,0,-60);
                 //robotAPI.motion.moveBody(0,0,30);
-                robotAPI.motion.moveHead(0,10,L2);
+                robotAPI.motion.moveHead(0, 10, L2);
                 //robotAPI.motion.moveHead(0,0,L2);
               /*  robotAPI.robot.speak("Please take the " + "Wednesday, " + globalformat + "," + globalMed +
                         " " + "," +"and " + globalRecom + "and don't forget to " + globalReminder +
@@ -198,7 +239,7 @@ public class RingingDoneActivity extends RobotActivity {
             }
         }.start();
 
-        new CountDownTimer(24000,1000){
+        new CountDownTimer(24000, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
@@ -212,9 +253,9 @@ public class RingingDoneActivity extends RobotActivity {
                 Intent intent = new Intent(RingingDoneActivity.this, CameraActivity.class);
                 intent.putExtra("format", globalformat);
                 intent.putExtra("med", globalMed);
-                intent.putExtra("name",globalname);
+                intent.putExtra("name", globalname);
                 intent.putExtra("recom", globalRecom);
-                intent.putExtra("remind",globalReminder);
+                intent.putExtra("remind", globalReminder);
                 startActivity(intent);
             }
         }.start();
@@ -253,7 +294,130 @@ public class RingingDoneActivity extends RobotActivity {
         return alert;
     }
 
-    private void startDetectFace(){
+    private void newLoco() {
+        //robotAPI.motion.goTo(sRoom1);
+        //robotAPI.slam.getLocation();
+
+        new CountDownTimer(120000, 1000) {
+
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+
+
+                //robotAPI.slam.getLocation();
+                robotAPI.utility.findPersonNearby();
+                robotAPI.vision.requestDetectPerson(60);
+                robotAPI.utility.lookAtUser(7);
+                robotAPI.robot.setExpression(RobotFace.DEFAULT);
+
+            }
+        }.start();
+
+        if (personDetect = true) {
+            int SerialFollow = robotAPI.utility.followUser();
+            new CountDownTimer(30000, 1000) {
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+
+                }
+
+                @Override
+                public void onFinish() {
+                    robotAPI.cancelCommandBySerial(SerialFollow);
+                    Intent intent = new Intent(RingingDoneActivity.this, MainActivity_pray.class);
+                    startActivity(intent);
+                }
+            }.start();
+            //Intent intent = new Intent(MainActivity.this,CameraActivity.class);
+        } else {
+            robotAPI.robot.speak("Not Found");
+        }
+       /* robotAPI.utility.findPersonNearby();
+        robotAPI.vision.requestDetectPerson(60);
+        robotAPI.utility.lookAtUser(7);
+        robotAPI.robot.setExpression(RobotFace.DEFAULT);*/
+
+    }
+
+    private void Loco() {
+        robotAPI.robot.speak("Going to bedroom");
+        robotAPI.motion.goTo(sRoom1);
+        thismap = "map 1";
+
+        new CountDownTimer(120000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                //robotAPI.robot.speak("Starting Camera...");
+                //dispatchTakePictureIntent();
+                //galleryAddPic();
+                startDetectFace();
+                TimerDetect = new CountDownTimer(40000, 10000) {
+
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
+                        if (!facedetect_result.equals("no face detect")) {
+                            robotAPI.robot.speak("Face Found");
+                            TimerDetect.cancel();
+                            TimerDetect = null;
+                            robotAPI.robot.speak("Timer Stopped");
+                            stopDetectFace();
+                            robotAPI.robot.speak("Face Found");
+                            Intent i = new Intent(RingingDoneActivity.this, CameraActivity_pray.class);
+                            startActivity(i);
+                        } else {
+                            robotAPI.robot.speak("Face Not Found");
+                            //robotAPI.robot.speak("Rotating...");
+                            //robotAPI.motion.moveBody(0,0,90);
+                        }
+                    }
+
+                    @Override
+                    public void onFinish() {
+
+                        robotAPI.robot.speak("Timeout");
+                        stopDetectFace();
+                        Intent i = new Intent(RingingDoneActivity.this, AfterMedActivity.class);
+
+                    }
+                }.start();
+            }
+        }.start();
+
+
+    }
+
+    private void startDetectFace() {
+        // start detect face
+        VisionConfig.FaceDetectConfig config = new VisionConfig.FaceDetectConfig();
+        config.enableDebugPreview = true;  // set to true if you need preview screen
+        config.intervalInMS = 2000;
+        config.enableDetectHead = true;
+        robotAPI.vision.requestDetectFace(config);
+    }
+
+    private void stopDetectFace() {
+        // stop detect face
+        robotAPI.vision.cancelDetectFace();
+    }
+
+
+
+
+   /* private void startDetectFace(){
 
         //TODO: Query to find the time format (AM/PM)
 
@@ -262,27 +426,27 @@ public class RingingDoneActivity extends RobotActivity {
         config.intervalInMS = 1000;
         config.enableDetectHead = true;
         int serialFaceDetect = robotAPI.vision.requestDetectFace(config);
-        robotAPI.robot.setExpression(RobotFace.HAPPY,"Patrick I found you!");
+        //robotAPI.robot.setExpression(RobotFace.HAPPY,"Patrick I found you!");
 
-        new CountDownTimer(8000, 1000) {
+        /*new CountDownTimer(8000, 1000) {
 
             public void onTick(long millisUntilFinished) {
             }
 
             public void onFinish() {
                 // robotAPI.robot.speak("Have a good day");
-                robotAPI.robot.speak("This is your afternoon medicine, please take it");
+                //robotAPI.robot.speak("This is your afternoon medicine, please take it");
             }
-        }.start();
+        }.start();*/
 
-        //robotAPI.utility.followUser();
+    //robotAPI.utility.followUser();
 
-        int serialFollow = robotAPI.utility.followUser();
+    // int serialFollow = robotAPI.utility.followUser();
 
 
 //        robotAPI.vision.cancelDetectFace(serialFollow);
 
-        new CountDownTimer(10000, 1000) {
+        /*new CountDownTimer(10000, 1000) {
 
             public void onTick(long millisUntilFinished) {
             }
@@ -298,7 +462,9 @@ public class RingingDoneActivity extends RobotActivity {
         }.start();
 
 
-        /*new CountDownTimer(8000, 1000) {
+
+
+        new CountDownTimer(8000, 1000) {
 
             public void onTick(long millisUntilFinished) {
             }
@@ -307,7 +473,7 @@ public class RingingDoneActivity extends RobotActivity {
                 //robotAPI.robot.speak("Have a good day");
 
             }
-        }.start();*/
+        }.start();
 
 
 
@@ -319,7 +485,7 @@ public class RingingDoneActivity extends RobotActivity {
         robotAPI.vision.cancelDetectFace();
         robotAPI.utility.resetToDefaultSetting();
 
-    }
+    }*/
 
     public static RobotCallback robotCallback = new RobotCallback() {
         @Override
@@ -339,6 +505,23 @@ public class RingingDoneActivity extends RobotActivity {
         @Override
         public void initComplete() {
             super.initComplete();
+
+        }
+
+        @Override
+        public void onDetectPersonResult(List<DetectPersonResult> resultList) {
+            super.onDetectPersonResult(resultList);
+
+            Log.d("RobotDevSample", "onDetectFaceResult: " + resultList.get(0));
+
+            //use toast to show detected faces
+            //facedetect_result = "Face Detected";
+
+            //String toast_result = "Detect Face";
+//            Toast toast = Toast.makeText(context, toast_result, Toast.LENGTH_SHORT);
+            //           toast.show();
+            //super.onDetectPersonResult(resultList);
+            personDetect = true;
 
         }
     };

@@ -21,6 +21,8 @@
     <uses-feature android:name="android.hardware.bluetooth" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
         android:name=".myapplication"
@@ -50,6 +52,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.example.myapplication.ObjectDetectionActivity"
+            android:screenOrientation="landscape"/>
 
         <service
             android:name=".service.MyFirebaseInstanceIDService"
