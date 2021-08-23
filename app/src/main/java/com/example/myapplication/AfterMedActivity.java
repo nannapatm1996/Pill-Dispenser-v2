@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -19,6 +21,11 @@ import com.asus.robotframework.API.RobotErrorCode;
 import com.asus.robotframework.API.RobotFace;
 import com.asus.robotframework.API.WheelLights;
 import com.example.myapplication.service.MySingleton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.robot.asus.robotactivity.RobotActivity;
 
@@ -26,7 +33,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +57,10 @@ public class AfterMedActivity extends RobotActivity {
     String TOPIC;
 
     MediaPlayer mMediaPlayer;
+    FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
+    private FirebaseDatabase mFirebaseDatabase;
+    public DatabaseReference myRef;
+    public String name, format, med, recom, remind,dayofWeek, speech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +71,13 @@ public class AfterMedActivity extends RobotActivity {
 
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
-        String Blink;
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        myRef = mFirebaseDatabase.getReference();
+        //final DatabaseReference table_user = mDatabase.getReference("alarms");
 
         Calendar c = Calendar.getInstance();
         Date date = c.getTime();
-        String dayofWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date.getTime());
+        dayofWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date.getTime());
         Log.d("dayofWeek",dayofWeek);
 
 
@@ -79,21 +91,28 @@ public class AfterMedActivity extends RobotActivity {
         String format = getIntent().getStringExtra("format");
         String recom = getIntent().getStringExtra("recom");
         String remind = getIntent().getStringExtra("remind");
+        name = "nannapat";
+        med = "paracetamol";
 
-                robotAPI.robot.speak("Please take the " + dayofWeek + " ," + format + "," + med +
+
+        robotAPI.robot.speak("Please take the " + dayofWeek + " ," + format + "," + med +
                 " " + "," +"and " + recom + "and don't forget to " + remind +
                 " before taking the pill from the pill dispenser box");
 
+        getData();
+        //robotAPI.robot.speak(speech);
         robotAPI.robot.speak("Did you take the medicine?");
 
+        String finalName = name;
+        String finalMed = med;
         btnTook.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Log.d("Intent_name", name);
+                //Log.d("Intent_name", name);
                 TOPIC = "/topics/pills"; //topic has to match what the receiver subscribed to
                 NOTIFICATION_TITLE = "Pill Dispenser Result";
-                NOTIFICATION_MESSAGE = name +" already took" + " " +format + " " + med;
+                NOTIFICATION_MESSAGE = finalName +" already took" + " " +format + " " + finalMed;
 
                 JSONObject notification = new JSONObject();
                 JSONObject notifcationBody = new JSONObject();
@@ -127,10 +146,10 @@ public class AfterMedActivity extends RobotActivity {
                     }
 
                     public void onFinish() {
-                        robotAPI.robot.setExpression(RobotFace.PLEASED,"You will not forget to take your medicine anymore");
+                       /* robotAPI.robot.setExpression(RobotFace.PLEASED,"You will not forget to take your medicine anymore");
                         robotAPI.motion.moveBody(0,0,30);
                         robotAPI.motion.moveBody(0,0,-60);
-                        robotAPI.motion.moveBody(0,0,30);
+                        robotAPI.motion.moveBody(0,0,30);*/
 
                         robotAPI.robot.setExpression(RobotFace.ACTIVE);
                         robotAPI.robot.speak("you see, I can make your life more convenient");
@@ -141,14 +160,16 @@ public class AfterMedActivity extends RobotActivity {
             }
         });
 
+        String finalName1 = name;
+        String finalMed1 = med;
         btnSkip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //set up FCM
-                Log.d("Intent_name", name);
+                Log.d("Intent_name", finalName1);
                 TOPIC = "/topics/pills"; //topic has to match what the receiver subscribed to
                 NOTIFICATION_TITLE = "Pill Dispenser Result";
-                NOTIFICATION_MESSAGE = name +" did not took" + " " +format + " " + med + " please check";
+                NOTIFICATION_MESSAGE = finalName1 +" did not took" + " " +format + " " + finalMed1 + " please check";
 
                 JSONObject notification = new JSONObject();
                 JSONObject notifcationBody = new JSONObject();
@@ -288,6 +309,34 @@ public class AfterMedActivity extends RobotActivity {
             }
         };
         MySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+    }
+
+    private String getData(){
+        DatabaseReference table_user = mDatabase.getReference("alarms");
+        table_user.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    String Name = ds.child("name").getValue().toString();
+                    String Format = ds.child("format").getValue().toString();
+                    String Medicine = ds.child("med").getValue().toString();
+                    String Recom = ds.child("recom").getValue().toString();
+                    String addRemind = ds.child("addReminder").getValue().toString();
+
+
+                }
+
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        return speech;
     }
 
 

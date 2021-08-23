@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <TextureView
-        android:id="@+id/texture"
+        android:id="@+id/texturecam"
         android:layout_width="match_parent"
         android:layout_height="536dp"
         android:layout_above="@+id/btn_takepicture"

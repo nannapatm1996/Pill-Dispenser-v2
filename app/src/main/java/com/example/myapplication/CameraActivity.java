@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Camera;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -37,18 +36,13 @@ import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.asus.robotframework.API.MotionControl;
-import com.asus.robotframework.API.RobotAPI;
 import com.asus.robotframework.API.RobotCallback;
 import com.asus.robotframework.API.RobotCmdState;
 import com.asus.robotframework.API.RobotCommand;
@@ -56,6 +50,8 @@ import com.asus.robotframework.API.RobotErrorCode;
 import com.asus.robotframework.API.RobotFace;
 import com.robot.asus.robotactivity.RobotActivity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -76,9 +72,7 @@ import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class CameraActivity extends RobotActivity{
 
@@ -90,6 +84,7 @@ public class CameraActivity extends RobotActivity{
     String globalFile;
     private Button takePictureButton;
    // private TextureView textureView;
+     TextView responsetx;
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     static {
@@ -114,6 +109,7 @@ public class CameraActivity extends RobotActivity{
     public String name, medicine, format, responseResult, recom, remind,Sitting,Prostrating;
 
 
+
     public CameraActivity(RobotCallback robotCallback, RobotCallback.Listen robotListenCallback) {
         super(robotCallback, robotListenCallback);
     }
@@ -134,19 +130,16 @@ public class CameraActivity extends RobotActivity{
         recom = getIntent().getStringExtra("recom");
         remind = getIntent().getStringExtra("remind");
 
-        Sitting = "Sitting";
+        //Sitting = "Sitting";
 
 
-        textureView = (TextureView) findViewById(R.id.texture);
+        textureView = (TextureView) findViewById(R.id.texturecam);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         takePictureButton = (Button) findViewById(R.id.btn_takepicture);
         assert takePictureButton != null;
+//        response.setText(responseResult);
 
-        robotAPI.motion.moveBody(0,0, 180, MotionControl.SpeedLevel.Body.L2);
-        robotAPI.motion.moveBody(2,0,0, MotionControl.SpeedLevel.Body.L3);
-        robotAPI.motion.moveBody(0,0,180, MotionControl.SpeedLevel.Body.L2);
-        robotAPI.motion.moveHead(0,-10, MotionControl.SpeedLevel.Head.L2);
 
         new CountDownTimer(23000, 1000) {
 
@@ -156,8 +149,8 @@ public class CameraActivity extends RobotActivity{
             public void onFinish() {
                 takePicture();
                 selectImage();
-                connectServer();
-                robotAPI.motion.moveHead(0,0, MotionControl.SpeedLevel.Head.L2);
+                FacialRecognition("https://zenbo.pythonanywhere.com/identify_user");
+
             }
         }.start();
 
@@ -167,22 +160,14 @@ public class CameraActivity extends RobotActivity{
                 //set delay
                 takePicture();
                 selectImage();
-                connectServer();
+                FacialRecognition("https://zenbo.pythonanywhere.com/identify_user");
+
             }
         });
 
     }
 
-    public void connectServer() {
-        //EditText ipv4AddressView = findViewById(R.id.IPAddress);
-        //String ipv4Address = ipv4AddressView.getText().toString();
-        String ipv4Address = "199.212.33.81";
-        //String ipv4Address = "10.100.32.217";
-        //EditText portNumberView = findViewById(R.id.portNumber);
-        //String portNumber = portNumberView.getText().toString();
-        String portNumber = "5000";
-
-        String postUrl= "http://"+ipv4Address+":"+portNumber+"/";
+    public void FacialRecognition(String postUrl) {
 
         Log.d("Server", "byte");
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -195,20 +180,19 @@ public class CameraActivity extends RobotActivity{
 
         RequestBody postBodyImage = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("image", "androidFlask.jpg", RequestBody.create(MediaType.parse("image/*jpg"), byteArray))
+                .addFormDataPart("file", selectedImagePath, RequestBody.create(MediaType.parse("image/*jpg"), byteArray))
                 .build();
 
-        TextView responseText = findViewById(R.id.responseText);
-        responseText.setText("Please wait ...");
+        Log.d("path", selectedImagePath);
 
         postRequest(postUrl, postBodyImage);
     }
 
-    void postRequest(String postUrl, RequestBody postBody) {
+    void postRequest(final String postUrl, RequestBody postBody) {
 
-        OkHttpClient client = new OkHttpClient();
+        final OkHttpClient client = new OkHttpClient();
 
-        Request request = new Request.Builder()
+        final okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(postUrl)
                 .post(postBody)
                 .build();
@@ -221,53 +205,50 @@ public class CameraActivity extends RobotActivity{
                 e.printStackTrace();
 
 
-
                 // In order to access the TextView inside the UI thread, the code is executed inside runOnUiThread()
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView responseText = findViewById(R.id.responseText);
-                        responseText.setText("Failed to Connect to Server");
+                        // robotAPI.robot.speak("Zenbo Cannot Connect to the Server");
+                        //TextView responseText = findViewById(R.id.txFacialResponse);
+                        //responseText.setText("Failed to Connect to Server");
                     }
                 });
             }
 
             @Override
-            public void onResponse(Call call, final Response response) throws IOException {
+            public void onResponse(Call call, final okhttp3.Response response) throws IOException {
                 // In order to access the TextView inside the UI thread, the code is executed inside runOnUiThread()
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView responseText = findViewById(R.id.responseText);
+                        //TextView responseText = findViewById(R.id.txFacialResponse);
                         try {
-                            responseText.setText(response.body().string());
-                            responseResult = responseText.getText().toString();
-                            //responseResult = response.body().string();
-                            Log.d("response",responseResult);
-                            if (responseResult == Sitting){
-                                Intent intent = new Intent(CameraActivity.this, AfterMedActivity.class);
-                                Log.d("Result",responseResult);
-                                intent.putExtra("name", name);
-                                intent.putExtra("med", medicine);
-                                intent.putExtra("format", format);
-                                intent.putExtra("recom", recom);
-                                intent.putExtra("remind",remind);
-                                //intent.putExtra("imagePath",selectedImagePath);
-                                startActivity(intent);
-                            }else{
-                                Intent intent = new Intent(CameraActivity.this, PrayingWaitActivity.class);
-                                Log.d("Result",responseResult);
-                                intent.putExtra("name", name);
-                                intent.putExtra("med", medicine);
-                                intent.putExtra("format", format);
-                                intent.putExtra("recom", recom);
-                                intent.putExtra("remind", remind);
-                                //intent.putExtra("imagePath",selectedImagePath);
-                                startActivity(intent);
+
+                            if (postUrl.equals("https://zenbo.pythonanywhere.com/identify_user")) {
+                                responseResult = response.body().string();
+
+                                //responsetx.setText(responseResult);
+
+                                //condition
+                                    closeCamera();
+                                    Intent i = new Intent(CameraActivity.this,ObjectDetectionActivity.class);
+                                    startActivity(i);
+                                Log.d("response", responseResult);
+                            } else {
+                                JSONObject object = new JSONObject(response.body().string());
+                                JSONArray resultArray = object.getJSONArray("result");
+                                for (int i = 0; i < resultArray.length(); i++) {
+                                    JSONObject resultobject = resultArray.getJSONObject(i);
+                                    String response = resultobject.getString("label");
+                                    Log.d("responsePray", response);
+
+                                }
                             }
 
-
                         } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
@@ -498,8 +479,8 @@ public class CameraActivity extends RobotActivity{
             //make file using dateformat
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmddhhmmss");
             String date = dateFormat.format(new Date());
-            String photoFile = "/CamMain.jpg";
-            //String photoFile = "/Picture_"+date+".jpg";
+            String photoFile = "/CameraTest.jpg";
+           // String photoFile = "/Picture_"+date+".jpg";
             final File file = new File(Environment.getExternalStorageDirectory()+ photoFile);
             globalFile = file.toString();
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
@@ -710,6 +691,8 @@ public class CameraActivity extends RobotActivity{
 
         }
     };
+
+
 
     public CameraActivity(){super (robotCallback, robotListenCallback);}
 }

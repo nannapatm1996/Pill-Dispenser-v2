@@ -12,6 +12,12 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.asus.robotframework.API.RobotCallback;
 import com.asus.robotframework.API.RobotCmdState;
 import com.asus.robotframework.API.RobotCommand;
@@ -70,8 +76,7 @@ public class RingingDoneActivity extends RobotActivity {
     //Robot Locomotion
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     private static boolean isRobotApiInitialed = false;
-    private static String sRoom1;
-    private static String sRoom2;
+    private static String sRoom1,sRoom2,sRoom3,sRoom4,sRoom5;
     private int day, month, hr, min;
     private String IslamicUrl;
     private static String facedetect_result = "no face detect";
@@ -145,76 +150,116 @@ public class RingingDoneActivity extends RobotActivity {
                 mMediaPlayer.stop();
                 robotAPI.robot.setExpression(RobotFace.SHOCKED);
                 robotAPI.robot.setExpression(RobotFace.DEFAULT);
-                //robotAPI.motion.moveBody(0,0,30);
-                //robotAPI.robot.speak("Patrick, where are you");
-                //robotAPI.motion.moveBody(0,0,-60);
-                //robotAPI.motion.moveBody(0,0,30);
 
-                //robot Locomotion
-                ArrayList<RoomInfo> arrayListRooms = robotAPI.contacts.room.getAllRoomInfo();
-                sRoom1 = arrayListRooms.get(0).keyword;
-                sRoom2 = arrayListRooms.get(1).keyword;
-                // sRoom3 = arrayListRooms.get(2).keyword;
-                //mTvRoom1.setText(sRoom1+" ; "+sRoom2); set room at Text
+                IslamicCalendar();
+
 
                 //TODO: add fetch time and country
-                Calendar c = Calendar.getInstance();
-                SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date dt = new Date();
-                day = dt.getDate();
-                month = dt.getMonth() + 1;
-                hr = dt.getHours();
-                min = dt.getMinutes();
 
-                IslamicUrl = "https://zenbo.pythonanywhere.com/api/v1/resources/prayertime?day=" + day + "&month=" +
-                        month + "&hour=" + hr + "&minute=" + min + "&country=QA";
-
-                newLoco();
+                //Intent intent = new Intent(RingingDoneActivity.this, CameraActivity.class);
+                //startActivity(intent);
+                //newLoco();
 
             }
         }.start();
 
 
-        /*new CountDownTimer(5000,1000){
-            public void onTick(long millisUntilFinished){
+    }
+
+
+    private void IslamicCalendar(){
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date dt = new Date();
+        day = dt.getDate();
+        month = dt.getMonth() + 1;
+        hr = dt.getHours();
+        min = dt.getMinutes();
+
+        IslamicUrl = "https://zenbo.pythonanywhere.com/api/v1/resources/prayertime?day=" + day + "&month=" +
+                month + "&hour=" + hr + "&minute=" + min + "&country=QA";
+
+        StringRequest req = new StringRequest(Request.Method.GET, IslamicUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Log.d("Response", response);
+                motion(response);
+
+                }
+
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Volley", error.toString());
 
             }
-            public void onFinish(){
-                robotAPI.robot.setExpression(RobotFace.DEFAULT, globalname +", it's time to take your medicine");
-            }
-        }.start();
+        });
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(req);
 
-        new CountDownTimer(13000, 1000) {
+    }
 
+    private void motion(String prayingtime){
+        ArrayList<RoomInfo> roomInfo = robotAPI.contacts.room.getAllRoomInfo();
+        sRoom1 = roomInfo.get(0).keyword;
+        sRoom2 = roomInfo.get(1).keyword;
+        sRoom3 = roomInfo.get(2).keyword;
+        //sRoom4 = roomInfo.get(3).keyword;
+        //sRoom5 = roomInfo.get(4).keyword;
+        if(prayingtime.equals("True")){
+            robotAPI.motion.goTo(sRoom4);
+            new CountDownTimer(18000, 1000) {
+
+                public void onTick(long millisUntilFinished) {
+                }
+
+                public void onFinish() {
+                    findPerson(sRoom4);
+                }
+            }.start();
+
+        }
+        else{
+            robotAPI.motion.goTo(sRoom1);
+            new CountDownTimer(18000, 1000) {
+
+                public void onTick(long millisUntilFinished) {
+                }
+
+                public void onFinish() {
+                    findPerson(sRoom1);
+                }
+            }.start();
+
+        }
+    }
+
+    private void findPerson(String room){
+
+        new CountDownTimer(30000,1000) {
+
+            @Override
             public void onTick(long millisUntilFinished) {
+
             }
 
+            @Override
             public void onFinish() {
-                robotAPI.motion.moveBody(0,0,30);
-                //robotAPI.robot.speak("Patrick, where are you");
-                robotAPI.motion.moveBody(0,0,-60);
-                robotAPI.motion.moveBody(0,0,30);
-                robotAPI.robot.speak( globalname + ", where are you");
-                robotAPI.robot.setExpression(RobotFace.DOUBTING);
+                robotAPI.robot.speak("Find Person");
+                robotAPI.utility.findPersonNearby();
+                robotAPI.vision.requestDetectPerson(60);
+                robotAPI.utility.lookAtUser(5);
+                robotAPI.robot.setExpression(RobotFace.DEFAULT);
+                if(personDetect = true){
+                    onPersonDetect();
+                }
+                else{
+                    onPersonNotDetect(room);
+                }
+
             }
         }.start();
-
-        new CountDownTimer(16000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-
-                robotAPI.robot.speak("Oh, you are over there, I see you now");
-                robotAPI.robot.setExpression(RobotFace.PROUD);
-                //int SerialFollow = robotAPI.utility.followUser();
-                //startDetectFace();
-                StartFollowMe();
-
-            }
-        }.start();*/
-
     }
 
     private void StartFollowMe() {
@@ -226,16 +271,8 @@ public class RingingDoneActivity extends RobotActivity {
             }
 
             public void onFinish() {
-                // robotAPI.robot.speak("Have a good day");
                 robotAPI.robot.setExpression(RobotFace.HAPPY);
-                //robotAPI.motion.moveBody(0,0,30);
-                //robotAPI.motion.moveBody(0,0,-60);
-                //robotAPI.motion.moveBody(0,0,30);
                 robotAPI.motion.moveHead(0, 10, L2);
-                //robotAPI.motion.moveHead(0,0,L2);
-              /*  robotAPI.robot.speak("Please take the " + "Wednesday, " + globalformat + "," + globalMed +
-                        " " + "," +"and " + globalRecom + "and don't forget to " + globalReminder +
-                        " before taking the pill from the pill dispenser box");*/
             }
         }.start();
 
@@ -280,8 +317,6 @@ public class RingingDoneActivity extends RobotActivity {
         }
     }
 
-    //Get an alarm sound. Try for an alarm. If none set, try notification,
-    //Otherwise, ringtone.
     private Uri getAlarmUri() {
         //Uri path = Uri.parse("android.resouce://" + getPackageName() + "/raw/mediation_piano.mp3");
         Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
@@ -294,32 +329,8 @@ public class RingingDoneActivity extends RobotActivity {
         return alert;
     }
 
-    private void newLoco() {
-        //robotAPI.motion.goTo(sRoom1);
-        //robotAPI.slam.getLocation();
+    private void onPersonDetect() {
 
-        new CountDownTimer(120000, 1000) {
-
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            @Override
-            public void onFinish() {
-
-
-                //robotAPI.slam.getLocation();
-                robotAPI.utility.findPersonNearby();
-                robotAPI.vision.requestDetectPerson(60);
-                robotAPI.utility.lookAtUser(7);
-                robotAPI.robot.setExpression(RobotFace.DEFAULT);
-
-            }
-        }.start();
-
-        if (personDetect = true) {
             int SerialFollow = robotAPI.utility.followUser();
             new CountDownTimer(30000, 1000) {
 
@@ -330,19 +341,31 @@ public class RingingDoneActivity extends RobotActivity {
 
                 @Override
                 public void onFinish() {
+                    //send to Facial Recognition Activity
                     robotAPI.cancelCommandBySerial(SerialFollow);
-                    Intent intent = new Intent(RingingDoneActivity.this, MainActivity_pray.class);
+                    Intent intent = new Intent(RingingDoneActivity.this, CameraActivity.class);
                     startActivity(intent);
                 }
             }.start();
-            //Intent intent = new Intent(MainActivity.this,CameraActivity.class);
-        } else {
-            robotAPI.robot.speak("Not Found");
+    }
+
+    private void onPersonNotDetect(String prevRoom) {
+        if(prevRoom.equals(sRoom3)){
+            Intent i = new Intent(RingingDoneActivity.this, AfterMedActivity.class);
+            startActivity(i);
         }
-       /* robotAPI.utility.findPersonNearby();
-        robotAPI.vision.requestDetectPerson(60);
-        robotAPI.utility.lookAtUser(7);
-        robotAPI.robot.setExpression(RobotFace.DEFAULT);*/
+        else if(prevRoom.equals(sRoom1)){
+            robotAPI.motion.goTo(sRoom2);
+            findPerson(sRoom2);
+        }
+        else if(prevRoom.equals(sRoom2)){
+            robotAPI.motion.goTo(sRoom3);
+            findPerson(sRoom3);
+        }
+        /*else{
+            robotAPI.motion.goTo(sRoom4);
+            findPerson(sRoom4);
+        }*/
 
     }
 
@@ -376,12 +399,9 @@ public class RingingDoneActivity extends RobotActivity {
                             robotAPI.robot.speak("Timer Stopped");
                             stopDetectFace();
                             robotAPI.robot.speak("Face Found");
-                            Intent i = new Intent(RingingDoneActivity.this, CameraActivity_pray.class);
-                            startActivity(i);
                         } else {
                             robotAPI.robot.speak("Face Not Found");
-                            //robotAPI.robot.speak("Rotating...");
-                            //robotAPI.motion.moveBody(0,0,90);
+
                         }
                     }
 
@@ -416,77 +436,6 @@ public class RingingDoneActivity extends RobotActivity {
 
 
 
-
-   /* private void startDetectFace(){
-
-        //TODO: Query to find the time format (AM/PM)
-
-        VisionConfig.FaceDetectConfig config = new VisionConfig.FaceDetectConfig();
-        config.enableDebugPreview = true;  // set to true if you need preview screen
-        config.intervalInMS = 1000;
-        config.enableDetectHead = true;
-        int serialFaceDetect = robotAPI.vision.requestDetectFace(config);
-        //robotAPI.robot.setExpression(RobotFace.HAPPY,"Patrick I found you!");
-
-        /*new CountDownTimer(8000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-                // robotAPI.robot.speak("Have a good day");
-                //robotAPI.robot.speak("This is your afternoon medicine, please take it");
-            }
-        }.start();*/
-
-    //robotAPI.utility.followUser();
-
-    // int serialFollow = robotAPI.utility.followUser();
-
-
-//        robotAPI.vision.cancelDetectFace(serialFollow);
-
-        /*new CountDownTimer(10000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-                robotAPI.cancelCommand(serialFaceDetect);
-                robotAPI.cancelCommand(serialFollow);
-                robotAPI.motion.moveBody(0,0,180);
-                robotAPI.motion.moveBody((float) 0.30,0,0);
-                robotAPI.robot.speak("Have a good day");
-
-            }
-        }.start();
-
-
-
-
-        new CountDownTimer(8000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
-                //robotAPI.robot.speak("Have a good day");
-
-            }
-        }.start();
-
-
-
-
-    }
-
-    private void stopDetectFace() {
-        // stop detect face
-        robotAPI.vision.cancelDetectFace();
-        robotAPI.utility.resetToDefaultSetting();
-
-    }*/
-
     public static RobotCallback robotCallback = new RobotCallback() {
         @Override
         public void onResult(int cmd, int serial, RobotErrorCode err_code, Bundle result) {
@@ -513,14 +462,6 @@ public class RingingDoneActivity extends RobotActivity {
             super.onDetectPersonResult(resultList);
 
             Log.d("RobotDevSample", "onDetectFaceResult: " + resultList.get(0));
-
-            //use toast to show detected faces
-            //facedetect_result = "Face Detected";
-
-            //String toast_result = "Detect Face";
-//            Toast toast = Toast.makeText(context, toast_result, Toast.LENGTH_SHORT);
-            //           toast.show();
-            //super.onDetectPersonResult(resultList);
             personDetect = true;
 
         }
