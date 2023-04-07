@@ -207,6 +207,9 @@ public class RingingDoneActivity extends RobotActivity {
         sRoom3 = roomInfo.get(2).keyword;
         //sRoom4 = roomInfo.get(3).keyword;
         //sRoom5 = roomInfo.get(4).keyword;
+
+        //findPerson(sRoom1);
+
         if(prayingtime.equals("True")){
             robotAPI.motion.goTo(sRoom4);
             new CountDownTimer(18000, 1000) {

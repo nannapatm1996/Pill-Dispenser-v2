@@ -1,4 +1,5 @@
 package com.example.myapplication;
+//https://github.com/nannapatm1996/Pill-Dispenser-v2
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -14,13 +15,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.asus.robotframework.API.RobotCallback;
 import com.example.myapplication.Fragment.myAlarmFragment;
 import com.example.myapplication.Fragment.myBluetoothFragment;
 import com.example.myapplication.Fragment.myMedFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.robot.asus.robotactivity.RobotActivity;
 
 public class MainActivity extends BaseActivity {
 
